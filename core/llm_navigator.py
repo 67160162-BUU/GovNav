@@ -46,14 +46,30 @@ class GovNavLLM:
         self._init_llama_cpp()
         atexit.register(self.close)
 
+    @staticmethod
+    def _enforce_female_polite(text: str) -> str:
+        """ปรับหางเสียงและคำสรรพนามให้เป็นเจ้าหน้าที่ผู้หญิง (ค่ะ/นะคะ/ดิฉัน) เสมอ 100%"""
+        if not text:
+            return text
+        text = text.replace("ครับผม", "ค่ะ")
+        text = text.replace("นะครับ", "นะคะ")
+        text = text.replace("ไหมครับ", "ไหมคะ")
+        text = text.replace("ไหนครับ", "ไหนคะ")
+        text = text.replace("อะไรครับ", "อะไรคะ")
+        text = text.replace("หรือครับ", "หรือคะ")
+        text = text.replace("กระผม", "ดิฉัน")
+        text = text.replace("ผมขอ", "ดิฉันขอ")
+        text = text.replace("ครับ", "ค่ะ")
+        return text
+
     def _load_query_cache(self) -> Dict[str, str]:
-        """โหลดคลังแคชข้อความคำตอบ เพื่อให้คำถามเดิมได้ข้อความเดิม 100%"""
+        """โหลดคลังแคชข้อความคำตอบ พร้อมปรับหางเสียงเป็น ค่ะ/นะคะ อัตโนมัติ"""
         if os.path.exists(LLM_CACHE_FILE):
             try:
                 with open(LLM_CACHE_FILE, "r", encoding="utf-8") as cf:
                     data = json.load(cf)
                 if isinstance(data, dict):
-                    return data
+                    return {k: self._enforce_female_polite(str(v)) for k, v in data.items()}
             except Exception:
                 pass
         return {}
@@ -184,10 +200,10 @@ class GovNavLLM:
 
         if self.llm is not None and self.llm.poll() is None:
             user_message = (
-                f"คำถาม: {user_query}\n"
-                f"คำตอบอ้างอิง: ไปที่ {matched_dept['name_th']} ห้อง {matched_dept['room_id']} "
+                f"คำถามประชาชน: {user_query}\n"
+                f"ข้อมูลอ้างอิง: ไปที่ {matched_dept['name_th']} ห้อง {matched_dept['room_id']} "
                 f"ชั้น {matched_dept['floor']} ({matched_dept['walk_steps']}) เตรียมเอกสารคือ {docs_text}\n"
-                "สรุปคำพูดแนะนำประชาชนสั้นๆ 2 ประโยค:"
+                "สรุปคำพูดแนะนำประชาชนสั้นๆ 2 ประโยคในฐานะเจ้าหน้าที่ผู้หญิง (ลงท้ายด้วย ค่ะ หรือ นะคะ ห้ามใช้คำว่า ครับ):"
             )
             with self._lock:
                 try:
@@ -204,7 +220,7 @@ class GovNavLLM:
                         self.llm.stdin.flush()
                     resp = self._read_worker_json(self.llm)
                     if resp and resp.get("ok") and resp.get("answer"):
-                        return str(resp["answer"]).strip()
+                        return self._enforce_female_polite(str(resp["answer"]).strip())
                     if resp is None:
                         print("[!] โปรเซสโมเดล .gguf สิ้นสุดการทำงาน -> สลับใช้คำตอบมาตรฐานอัตโนมัติ", flush=True)
                         self.llm = None
@@ -212,10 +228,11 @@ class GovNavLLM:
                     print(f"[!] ข้อผิดพลาดขณะสื่อสารกับ LLM Worker ({err}) -> ใช้คำตอบมาตรฐานแทน", flush=True)
                     self.llm = None
 
+        clean_topic = self._enforce_female_polite(user_query)
         return (
-            f"สวัสดีครับ สำหรับเรื่อง {user_query} ขอแนะนำให้ไปที่ {matched_dept['name_th']} "
-            f"ห้อง {matched_dept['room_id']} ชั้น {matched_dept['floor']} {matched_dept['wing']} ครับ "
-            f"{matched_dept['walk_steps']} โดยกรุณาเตรียม {docs_text} มาแสดงต่อเจ้าหน้าที่ด้วยครับ"
+            f"สวัสดีค่ะ สำหรับเรื่อง {clean_topic} ขอแนะนำให้ไปติดต่อที่ {matched_dept['name_th']} "
+            f"ห้อง {matched_dept['room_id']} ชั้น {matched_dept['floor']} {matched_dept['wing']} นะคะ "
+            f"{matched_dept['walk_steps']} โดยกรุณาเตรียม {docs_text} มาแสดงต่อเจ้าหน้าที่ด้วยค่ะ"
         )
 
     def navigate(self, user_query: str, auto_open_image: bool = False, bypass_cache: bool = False) -> Dict[str, Any]:

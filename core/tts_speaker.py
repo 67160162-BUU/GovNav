@@ -26,7 +26,7 @@ from typing import Dict, Any, Optional
 import config
 
 BASE_DIR = getattr(config, "BASE_DIR", os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-TTS_MODEL = getattr(config, "TTS_MODEL", "th_f_1")
+TTS_MODEL = getattr(config, "TTS_MODEL", "th_f_2")
 TTS_VOLUME = float(getattr(config, "TTS_VOLUME", 1.0))
 TTS_SPEED = float(getattr(config, "TTS_SPEED", 1.0))
 AUDIO_OUT_DIR = getattr(config, "AUDIO_OUT_DIR", os.path.join(BASE_DIR, "assets", "audio_out"))
@@ -36,10 +36,7 @@ AVAILABLE_VOICES = getattr(
     config,
     "AVAILABLE_VOICES",
     {
-        "th_f_1": "👩 หญิง 1 (th_f_1) — สุภาพ นุ่มนวล ชัดเจน (แนะนำ)",
-        "th_f_2": "👩 หญิง 2 (th_f_2) — สดใส กระฉับกระเฉง",
-        "th_m_1": "👨 ชาย 1 (th_m_1) — สุภาพ ทางการ",
-        "th_m_2": "👨 ชาย 2 (th_m_2) — ทุ้มกังวาน ฟังง่าย",
+        "th_f_2": "👩 หญิง 2 (th_f_2) — สดใส สุภาพ ชัดเจน",
     },
 )
 
@@ -59,7 +56,7 @@ class GovNavTTSSpeaker:
         use_cache: bool = True,
     ):
         self.enabled = enabled
-        self.voice_name = voice_name if voice_name in AVAILABLE_VOICES else "th_f_1"
+        self.voice_name = voice_name if voice_name in AVAILABLE_VOICES else "th_f_2"
         self.volume = float(volume)
         self.speed = float(speed)
         self.use_cache = use_cache
@@ -211,15 +208,19 @@ class GovNavTTSSpeaker:
         }
 
     def _clean_text_for_speech(self, text: str) -> str:
-        """ทำความสะอาดข้อความและคำย่อราชการให้อ่านออกเสียงได้ราบรื่นเป็นธรรมชาติ"""
+        """ทำความสะอาดข้อความและบังคับหางเสียงผู้หญิง (ค่ะ/นะคะ) ให้อ่านออกเสียงได้ราบรื่นเป็นธรรมชาติ"""
         text = text.replace("กรุงเทพฯ", "กรุงเทพมหานคร").replace("ฯลฯ", "และอื่นๆ")
         text = text.replace("ปชช.", "ประชาชน").replace("ภ.ด.ส.", "พอดอสอ").replace("ภ.ป.", "พอปอ")
         text = text.replace("น.ส.4", "นอสอสี่").replace("น.ส.3", "นอสอสาม")
+        text = text.replace("ครับผม", "ค่ะ").replace("นะครับ", "นะคะ")
+        text = text.replace("ไหมครับ", "ไหมคะ").replace("ไหนครับ", "ไหนคะ")
+        text = text.replace("อะไรครับ", "อะไรคะ").replace("หรือครับ", "หรือคะ")
+        text = text.replace("กระผม", "ดิฉัน").replace("ครับ", "ค่ะ")
         text = text.replace("GovNav", "กอฟแนฟ")
         text = re.sub(r"ROOM_(\d+)", r"ห้อง \1", text)
         text = re.sub(r"[\(\)\[\]\{\}\"\'\*\#\_\~\|•—–]", " ", text)
         text = re.sub(r"\s+", " ", text).strip()
-        return text if text else "กรุณาติดต่อเจ้าหน้าที่ประชาสัมพันธ์ครับ"
+        return text if text else "กรุณาติดต่อเจ้าหน้าที่ประชาสัมพันธ์ค่ะ"
 
     def _get_cache_path(self, clean_text: str, voice: str, speed: float, volume: float) -> str:
         """สร้างพาธไฟล์แคช .wav จากข้อความและการตั้งค่าเสียง"""

@@ -45,7 +45,7 @@ def run_evaluation_suite(
     nav_ai: Optional[GovNavLLM] = None,
     tts_speaker: Optional[GovNavTTSSpeaker] = None,
     limit: int = 0,
-    voice_name: str = "th_f_1",
+    voice_name: str = "th_f_2",
     bypass_tts_cache: bool = True,
     progress_callback: Optional[Callable[[int, int, Dict[str, Any]], None]] = None,
 ) -> Dict[str, Any]:
@@ -253,7 +253,7 @@ def print_report_to_terminal(report: Dict[str, Any]):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="GovNav 30-Scenario Accuracy & Latency Evaluator")
     parser.add_argument("--limit", type=int, default=0, help="จำกัดจำนวนข้อทดสอบ (0 = รันครบทั้ง 30 สถานการณ์)")
-    parser.add_argument("--voice", type=str, default="th_f_1", help="เสียง VachanaTTS ที่ใช้วัดผล")
+    parser.add_argument("--voice", type=str, default="th_f_2", help="เสียง VachanaTTS ที่ใช้วัดผล")
     parser.add_argument("--use-cache", action="store_true", help="เปิดอ่านจากแคชเสียง (ค่าเริ่มต้นคือปิดแคชเพื่อวัดเวลาสร้างเสียงจริง)")
     args = parser.parse_args()
 

@@ -39,7 +39,7 @@ def main():
             os.chdir(base_dir)
             TTS(
                 req["text"],
-                voice=req.get("voice", "th_f_1"),
+                voice=req.get("voice", "th_f_2"),
                 output=req["output"],
                 volume=float(req.get("volume", 1.0)),
                 speed=float(req.get("speed", 1.0)),

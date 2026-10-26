@@ -23,17 +23,14 @@ DEPARTMENTS_FILE = os.path.join(DATA_DIR, "departments.json")
 SYSTEM_PROMPT_FILE = os.path.join(DATA_DIR, "system_prompt.txt")
 SQLITE_DB_PATH = os.path.join(DATA_DIR, "govnav_logs.db")
 
-# ตั้งค่าโมเดลเริ่มต้น
+# ตั้งค่าโมเดลเริ่มต้น (ใช้เฉพาะเสียงผู้หญิงที่ 2: th_f_2)
 MODEL_NAME = "Local-1B-GGUF"
-TTS_MODEL = "th_f_1"  # เสียง VachanaTTS รองรับ: th_f_1, th_f_2 (หญิง), th_m_1, th_m_2 (ชาย)
+TTS_MODEL = "th_f_2"
 TTS_VOLUME = 1.0
 TTS_SPEED = 1.0
 
 AVAILABLE_VOICES = {
-    "th_f_1": "👩 หญิง 1 (th_f_1) — สุภาพ นุ่มนวล ชัดเจน (แนะนำ)",
-    "th_f_2": "👩 หญิง 2 (th_f_2) — สดใส กระฉับกระเฉง",
-    "th_m_1": "👨 ชาย 1 (th_m_1) — สุภาพ ทางการ",
-    "th_m_2": "👨 ชาย 2 (th_m_2) — ทุ้มกังวาน ฟังง่าย",
+    "th_f_2": "👩 หญิง 2 (th_f_2) — สดใส สุภาพ ชัดเจน",
 }
 
 

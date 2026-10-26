@@ -10,35 +10,63 @@ GovNav - Raspberry Pi 4 IoT Hardware Controller
 หมายเหตุ: ถ้ารันบนคอมพิวเตอร์ (Mac/PC) ที่ไม่มี RPi.GPIO ระบบจะสลับเข้าโหมดจำลอง (Hardware Simulation) อัตโนมัติ
 """
 
+import sys
 import time
 import random
+import threading
+import subprocess
+import importlib.util
 from typing import Dict, Any
 
 from config import GPIO_PINS, APPROACH_DISTANCE_CM
 
-try:
-    import RPi.GPIO as GPIO
-    HAS_RPI_GPIO = True
-except ImportError:
-    HAS_RPI_GPIO = False
+GPIO = None
+HAS_RPI_GPIO = False
+
+if sys.platform.startswith("linux") and importlib.util.find_spec("RPi") is not None:
+    try:
+        probe = subprocess.run(
+            [
+                sys.executable,
+                "-c",
+                "import RPi.GPIO as G; G.setmode(G.BCM); G.setwarnings(False); G.setup(17, G.OUT)",
+            ],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            timeout=3,
+        )
+        if probe.returncode == 0:
+            import RPi.GPIO as _GPIO
+            GPIO = _GPIO
+            HAS_RPI_GPIO = True
+        else:
+            print(f"[!] RPi.GPIO ไม่รองรับเคอร์เนลปัจจุบัน (code {probe.returncode}) -> ใช้โหมดจำลองฮาร์ดแวร์ปลอดภัย", flush=True)
+    except Exception:
+        HAS_RPI_GPIO = False
 
 
 class GovNavIoTHardware:
-    """คลาสจัดการพอร์ต GPIO เซนเซอร์ และไฟ LED บอกทิศทางบน Raspberry Pi 4"""
+    """คลาสจัดการพอร์ต GPIO เซนเซอร์ และไฟ LED บอกทิศทางบน Raspberry Pi 4 (Thread-Safe & Segfault-Proof)"""
 
     def __init__(self):
         self.is_raspberry_pi = HAS_RPI_GPIO
         self.active_led_direction = "OFF"
-        if self.is_raspberry_pi:
-            GPIO.setmode(GPIO.BCM)
-            GPIO.setwarnings(False)
-            GPIO.setup(GPIO_PINS["ULTRASONIC_TRIG"], GPIO.OUT)
-            GPIO.setup(GPIO_PINS["ULTRASONIC_ECHO"], GPIO.IN)
-            GPIO.setup(GPIO_PINS["LED_LEFT"], GPIO.OUT)
-            GPIO.setup(GPIO_PINS["LED_RIGHT"], GPIO.OUT)
-            GPIO.setup(GPIO_PINS["LED_STRAIGHT"], GPIO.OUT)
-            GPIO.setup(GPIO_PINS["STAFF_BUZZER"], GPIO.OUT)
-            GPIO.setup(GPIO_PINS["HELP_BUTTON"], GPIO.IN, pull_up_down=GPIO.PUD_UP)
+        self._gpio_lock = threading.Lock()
+        if self.is_raspberry_pi and GPIO is not None:
+            try:
+                with self._gpio_lock:
+                    GPIO.setmode(GPIO.BCM)
+                    GPIO.setwarnings(False)
+                    GPIO.setup(GPIO_PINS["ULTRASONIC_TRIG"], GPIO.OUT)
+                    GPIO.setup(GPIO_PINS["ULTRASONIC_ECHO"], GPIO.IN)
+                    GPIO.setup(GPIO_PINS["LED_LEFT"], GPIO.OUT)
+                    GPIO.setup(GPIO_PINS["LED_RIGHT"], GPIO.OUT)
+                    GPIO.setup(GPIO_PINS["LED_STRAIGHT"], GPIO.OUT)
+                    GPIO.setup(GPIO_PINS["STAFF_BUZZER"], GPIO.OUT)
+                    GPIO.setup(GPIO_PINS["HELP_BUTTON"], GPIO.IN, pull_up_down=GPIO.PUD_UP)
+            except Exception as err:
+                print(f"[!] ตั้งค่า GPIO ไม่สำเร็จ ({err}) -> สลับเป็นโหมดจำลองฮาร์ดแวร์", flush=True)
+                self.is_raspberry_pi = False
 
     def read_visitor_distance_cm(self) -> float:
         """วัดระยะห่างของผู้มาติดต่อหน้าตู้ (หน่วย: เซนติเมตร)"""

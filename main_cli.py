@@ -24,10 +24,10 @@ from core.db_logger import GovNavDBLogger
 AVAILABLE_VOICES = getattr(
     config,
     "AVAILABLE_VOICES",
-    {"th_f_1": "หญิง 1", "th_f_2": "หญิง 2", "th_m_1": "ชาย 1", "th_m_2": "ชาย 2"},
+    {"th_f_2": "หญิง 2"},
 )
-raw_tts_model = getattr(config, "TTS_MODEL", "th_f_1")
-TTS_MODEL = raw_tts_model if raw_tts_model in AVAILABLE_VOICES else "th_f_1"
+raw_tts_model = getattr(config, "TTS_MODEL", "th_f_2")
+TTS_MODEL = raw_tts_model if raw_tts_model in AVAILABLE_VOICES else "th_f_2"
 
 
 def display_navigation_result(res: dict, sensor_data: dict, tts_time_sec: float = 0.0, tts_engine_label: str = ""):
@@ -113,7 +113,7 @@ def run_interactive(open_image: bool = True, enable_tts: bool = True, model_path
         while True:
             user_q = input("\n🎤 กรุณาระบุเรื่องที่มาติดต่อราชการ: ").strip()
             if not user_q or user_q.lower() in ("exit", "quit", "q"):
-                print("ขอบคุณที่ใช้บริการ GovNav ครับ สวัสดีครับ!")
+                print("ขอบคุณที่ใช้บริการ GovNav ค่ะ สวัสดีค่ะ!")
                 break
 
             sensor_data = iot_hw.read_environment()
@@ -141,7 +141,7 @@ if __name__ == "__main__":
         type=str,
         default=TTS_MODEL,
         choices=list(AVAILABLE_VOICES.keys()),
-        help="เลือกเสียงพูด VachanaTTS (th_f_1, th_f_2, th_m_1, th_m_2)",
+        help="เลือกเสียงพูด VachanaTTS (ค่าเริ่มต้น: th_f_2 เสียงผู้หญิงที่ 2)",
     )
     parser.add_argument("--model", type=str, default="", help="ระบุพาธไฟล์โมเดล .gguf (ถ้าไม่ระบุจะค้นหาโมเดล 1B ใน ../models/ อัตโนมัติ)")
     args = parser.parse_args()

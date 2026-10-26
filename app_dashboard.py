@@ -10,7 +10,7 @@ GovNav (Government Navigator) - Complete Interactive Web Kiosk & Dashboard
 คุณสมบัติครบถ้วนพร้อมใช้งานจริง (Resilient Production-Ready Kiosk):
 1. รองรับเสียงพูดภาษาไทย Offline 100% ด้วย VachanaTTS (VITS + Piper ONNX)
    - ทำงานได้แม้ไฟล์ใน core/ จะเป็นเวอร์ชันเก่าหรือใหม่ (Zero-AttributeError)
-   - เลือกเสียงผู้หญิง/ผู้ชาย (th_f_1, th_f_2, th_m_1, th_m_2) ปรับความเร็วและความดังได้
+   - ใช้โมเดลเสียงผู้หญิงที่ 2 (th_f_2) คู่กับบุคลิกเจ้าหน้าที่ประชาสัมพันธ์หญิง (ค่ะ/นะคะ) ปรับความเร็วและความดังได้
    - มีเครื่องเล่นเสียงบนหน้าเว็บ (Web Audio Player) + รองรับลำโพงบอร์ด RPi4 (aplay)
 2. ประมวลผลคำถามภาษาชาวบ้านด้วย On-Device Qwen (.gguf) + Smart Keyword RAG
 3. แสดงแผนที่นำทางครบ 2 รูปแบบ: แผนผังกราฟิก (.png) และแผนที่เส้นขีด (ASCII Slip Map)
@@ -32,6 +32,7 @@ import sqlite3
 import hashlib
 import inspect
 import subprocess
+import importlib.util
 import streamlit as st
 
 import config
@@ -58,14 +59,11 @@ AVAILABLE_VOICES = getattr(
     config,
     "AVAILABLE_VOICES",
     {
-        "th_f_1": "👩 หญิง 1 (th_f_1) — สุภาพ นุ่มนวล ชัดเจน (แนะนำ)",
-        "th_f_2": "👩 หญิง 2 (th_f_2) — สดใส กระฉับกระเฉง",
-        "th_m_1": "👨 ชาย 1 (th_m_1) — สุภาพ ทางการ",
-        "th_m_2": "👨 ชาย 2 (th_m_2) — ทุ้มกังวาน ฟังง่าย",
+        "th_f_2": "👩 หญิง 2 (th_f_2) — สดใส สุภาพ ชัดเจน",
     },
 )
-raw_tts_model = getattr(config, "TTS_MODEL", "th_f_1")
-TTS_MODEL = raw_tts_model if raw_tts_model in AVAILABLE_VOICES else "th_f_1"
+raw_tts_model = getattr(config, "TTS_MODEL", "th_f_2")
+TTS_MODEL = raw_tts_model if raw_tts_model in AVAILABLE_VOICES else "th_f_2"
 
 # -----------------------------------------------------------------------------
 # ตั้งค่าหน้าเพจ Streamlit
@@ -216,12 +214,7 @@ def create_tts_instance():
 def safe_tts_status(tts_obj) -> dict:
     if hasattr(tts_obj, "get_engine_status"):
         return tts_obj.get_engine_status()
-    has_vachana = False
-    try:
-        import vachanatts  # noqa: F401
-        has_vachana = True
-    except ImportError:
-        has_vachana = False
+    has_vachana = importlib.util.find_spec("vachanatts") is not None
     os.makedirs(VOICES_DIR, exist_ok=True)
     os.makedirs(AUDIO_CACHE_DIR, exist_ok=True)
     models = [os.path.basename(p).replace(".onnx", "") for p in glob.glob(os.path.join(VOICES_DIR, "*.onnx"))]
@@ -237,12 +230,25 @@ def safe_tts_status(tts_obj) -> dict:
     }
 
 
+def _normalize_female_text(text: str) -> str:
+    if not text:
+        return text
+    text = text.replace("ครับผม", "ค่ะ").replace("นะครับ", "นะคะ")
+    text = text.replace("ไหมครับ", "ไหมคะ").replace("ไหนครับ", "ไหนคะ")
+    text = text.replace("อะไรครับ", "อะไรคะ").replace("หรือครับ", "หรือคะ")
+    text = text.replace("กระผม", "ดิฉัน").replace("ผมขอ", "ดิฉันขอ")
+    return text.replace("ครับ", "ค่ะ")
+
+
 def safe_navigate(nav_obj, user_query: str, bypass_cache: bool = False) -> dict:
     """เรียกใช้ nav_ai.navigate พร้อมระบบแคชคำตอบสำรอง ป้องกัน Qwen สุ่มคำพูดใหม่ทุกครั้งที่กดปุ่มเดิม"""
     norm_q = re.sub(r"\s+", " ", user_query.strip())
     nav_params = inspect.signature(nav_obj.navigate).parameters
     if "bypass_cache" in nav_params:
-        return nav_obj.navigate(norm_q, auto_open_image=False, bypass_cache=bypass_cache)
+        res_direct = nav_obj.navigate(norm_q, auto_open_image=False, bypass_cache=bypass_cache)
+        if "spoken_response" in res_direct:
+            res_direct["spoken_response"] = _normalize_female_text(res_direct["spoken_response"])
+        return res_direct
 
     # กรณี core/llm_navigator.py บนเครื่องยังเป็นไฟล์เก่า ให้เช็กและแคชคำตอบที่ระดับ Dashboard ทันที
     full_cache_file = os.path.join(DATA_DIR, "llm_full_result_cache.json")
@@ -256,6 +262,8 @@ def safe_navigate(nav_obj, user_query: str, bypass_cache: bool = False) -> dict:
 
     if (not bypass_cache) and (norm_q in cache_map) and isinstance(cache_map[norm_q], dict):
         cached_res = dict(cache_map[norm_q])
+        if "spoken_response" in cached_res:
+            cached_res["spoken_response"] = _normalize_female_text(cached_res["spoken_response"])
         cached_res["llm_cache_hit"] = True
         cached_res["llm_time_sec"] = 0.001
         cached_res["map_routing_time_sec"] = 0.001
@@ -265,6 +273,8 @@ def safe_navigate(nav_obj, user_query: str, bypass_cache: bool = False) -> dict:
 
     t_nav0 = time.perf_counter()
     res = nav_obj.navigate(norm_q, auto_open_image=False)
+    if "spoken_response" in res:
+        res["spoken_response"] = _normalize_female_text(res["spoken_response"])
     res["llm_cache_hit"] = False
     res.setdefault("llm_time_sec", round(time.perf_counter() - t_nav0, 4))
     res.setdefault("map_routing_time_sec", 0.002)
@@ -313,6 +323,7 @@ def safe_tts_speak(
     clean_text = text.replace("กรุงเทพฯ", "กรุงเทพมหานคร").replace("ฯลฯ", "และอื่นๆ")
     clean_text = clean_text.replace("ปชช.", "ประชาชน").replace("ภ.ด.ส.", "พอดอสอ").replace("ภ.ป.", "พอปอ")
     clean_text = clean_text.replace("น.ส.4", "นอสอสี่").replace("น.ส.3", "นอสอสาม").replace("GovNav", "กอฟแนฟ")
+    clean_text = clean_text.replace("ครับผม", "ค่ะ").replace("นะครับ", "นะคะ").replace("ครับ", "ค่ะ")
     clean_text = re.sub(r"ROOM_(\d+)", r"ห้อง \1", clean_text)
     clean_text = re.sub(r"[\(\)\[\]\{\}\"\'\*\#\_\~\|•—–]", " ", clean_text)
     clean_text = re.sub(r"\s+", " ", clean_text).strip()
@@ -329,15 +340,16 @@ def safe_tts_speak(
         print(f"⚡ [TTS Cache Hit] ดึงไฟล์เสียงจากแคชทันที ({os.path.basename(cache_path)}) ใช้เวลา {tts_obj.last_tts_time_sec:.4f}s", flush=True)
     else:
         try:
-            from vachanatts import TTS
-            prev_cwd = os.getcwd()
-            try:
-                if not bypass_cache:
-                    print(f"🎙️ [VachanaTTS] กำลังสร้างเสียงใหม่และบันทึกลงแคช ({os.path.basename(cache_path)})...", flush=True)
-                os.chdir(BASE_DIR)
-                TTS(clean_text, voice=voice_name, output=output_wav, volume=volume, speed=speed)
-            finally:
-                os.chdir(prev_cwd)
+            if not bypass_cache:
+                print(f"🎙️ [VachanaTTS] กำลังสร้างเสียงใหม่และบันทึกลงแคช ({os.path.basename(cache_path)})...", flush=True)
+            py_code = (
+                "import sys, json; from vachanatts import TTS; d = json.loads(sys.argv[1]); "
+                "TTS(d['t'], voice=d['v'], output=d['o'], volume=d['vol'], speed=d['spd'])"
+            )
+            arg_json = json.dumps({"t": clean_text, "v": voice_name, "o": output_wav, "vol": volume, "spd": speed})
+            res_sub = subprocess.run([sys.executable, "-c", py_code, arg_json], cwd=BASE_DIR)
+            if res_sub.returncode != 0 or not os.path.exists(output_wav):
+                raise RuntimeError(f"vachanatts subprocess exit {res_sub.returncode}")
             if (not bypass_cache) and os.path.exists(output_wav) and os.path.getsize(output_wav) > 512:
                 shutil.copy2(output_wav, cache_path)
             tts_obj.last_engine_used = f"VachanaTTS ({voice_name})"
@@ -458,7 +470,7 @@ def format_led_label(direction_code: str) -> str:
 QUICK_PRESETS = [
     ("🪪 บัตร ปชช. / ทะเบียนบ้าน", "มาทำบัตรประชาชนใหม่ บัตรเดิมหาย และคัดสำเนาทะเบียนบ้าน ต้องไปห้องไหน"),
     ("👵 เบี้ยผู้สูงอายุ / บัตรคนจน", "ยายมาจากต่างอำเภอ จะมาลงทะเบียนเบี้ยคนชราและบัตรสวัสดิการแห่งรัฐ"),
-    ("💰 ชำระภาษีที่ดิน / ภาษีป้าย", "มาจ่ายภาษีที่ดินและสิ่งปลูกสร้าง ชำระเงินที่ห้องไหนครับ"),
+    ("💰 ชำระภาษีที่ดิน / ภาษีป้าย", "มาจ่ายภาษีที่ดินและสิ่งปลูกสร้าง ต้องไปชำระเงินที่ห้องไหน"),
     ("🏡 โอนที่ดิน / ขออนุญาตก่อสร้าง", "มาโอนที่ดินมรดกและขออนุญาตก่อสร้างบ้าน ต้องขึ้นไปชั้นไหน"),
     ("⚖️ ร้องทุกข์ / ปรึกษากฎหมาย", "ต้องการร้องเรียนปัญหาความเดือดร้อนและปรึกษากฎหมายที่ศูนย์ดำรงธรรม"),
 ]
@@ -587,7 +599,7 @@ with st.sidebar:
         greeting_wav = os.path.join(AUDIO_OUT_DIR, "test_greeting.wav")
         safe_tts_speak(
             tts_speaker,
-            "สวัสดีค่ะ ยินดีต้อนรับสู่ศูนย์บริการประชาชน กอฟแนฟ กรุณาเลือกเรื่องที่ต้องการติดต่อที่หน้าจอได้เลยค่ะ",
+            "สวัสดีค่ะ ยินดีต้อนรับสู่ศูนย์บริการประชาชน กอฟแนฟ กรุณาเลือกเรื่องที่ต้องการติดต่อที่หน้าจอได้เลยนะคะ",
             output_wav=greeting_wav,
             play_device=play_os_speaker,
             voice_name=selected_voice,

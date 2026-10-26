@@ -64,9 +64,9 @@ pip install -r requirements.txt
 ```bash
 python download_voices_offline.py
 ```
-*(หลังจากขั้นตอนนี้ ไฟล์ `th_f_1.onnx`, `th_f_2.onnx`, `th_m_1.onnx`, `th_m_2.onnx` จะอยู่ใน `GovNav/voices/` ถอดเน็ตออกแล้วใช้งานแบบ Offline 100% ได้ตลอดไป)*
+*(หลังจากขั้นตอนนี้ ไฟล์เสียงผู้หญิงที่ 2 `th_f_2.onnx` จะอยู่ใน `GovNav/voices/` ถอดเน็ตออกแล้วใช้งานแบบ Offline 100% ได้ตลอดไป)*
 
-#### 3. สั่งรันโปรแกรม (เลือกได้ทั้ง 3 โหมด)
+#### 3. สั่งรันโปรแกรม (เลือกได้ทั้ง 4 โหมด)
 
 * **โหมดที่ 1 — หน้าจอ Interactive Web Kiosk & Dashboard ฉบับสมบูรณ์:**
   ```bash
@@ -76,7 +76,7 @@ python download_voices_offline.py
 
 * **โหมดที่ 2 — ถาม-ตอบสดผ่าน Terminal พร้อมเสียงพูดไทยออกลำโพง (`aplay`):**
   ```bash
-  python main_cli.py --open-image --tts --voice th_f_1
+  python main_cli.py --open-image --tts --voice th_f_2
   ```
 
 * **โหมดที่ 3 — สาธิตอัตโนมัติ 3 คำถาม (สำหรับทดสอบระบบและอัดคลิปส่งอาจารย์):**
