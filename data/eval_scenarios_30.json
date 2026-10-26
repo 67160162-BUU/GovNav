@@ -1,0 +1,215 @@
+{
+  "description": "ชุดทดสอบความแม่นยำและเวลาตอบสนองของระบบ GovNav จำนวน 30 สถานการณ์ (ห้องละ 6 สถานการณ์)",
+  "scenarios": [
+    {
+      "id": 1,
+      "query": "ทำบัตรประชาชนใหม่ บัตรเดิมหาย ต้องไปติดต่อห้องไหนครับ",
+      "expected_room_id": "ROOM_101",
+      "expected_direction": "LEFT",
+      "category": "ฝ่ายทะเบียนราษฎร"
+    },
+    {
+      "id": 2,
+      "query": "จะมาต่ออายุบัตรประชาชน ต้องเดินไปทางไหน",
+      "expected_room_id": "ROOM_101",
+      "expected_direction": "LEFT",
+      "category": "ฝ่ายทะเบียนราษฎร"
+    },
+    {
+      "id": 3,
+      "query": "อยากย้ายทะเบียนบ้านเข้ามาอยู่อำเภอนี้ ติดต่อช่องไหนคะ",
+      "expected_room_id": "ROOM_101",
+      "expected_direction": "LEFT",
+      "category": "ฝ่ายทะเบียนราษฎร"
+    },
+    {
+      "id": 4,
+      "query": "ลูกเพิ่งคลอดเมื่อวาน จะมาแจ้งเกิดต้องไปห้องไหน",
+      "expected_room_id": "ROOM_101",
+      "expected_direction": "LEFT",
+      "category": "ฝ่ายทะเบียนราษฎร"
+    },
+    {
+      "id": 5,
+      "query": "มาขอคัดสำเนาทะเบียนบ้านฉบับเจ้าบ้าน เดินไปฝั่งไหน",
+      "expected_room_id": "ROOM_101",
+      "expected_direction": "LEFT",
+      "category": "ฝ่ายทะเบียนราษฎร"
+    },
+    {
+      "id": 6,
+      "query": "ต้องการเปลี่ยนชื่อนามสกุลใหม่ ต้องเตรียมอะไรและไปห้องไหน",
+      "expected_room_id": "ROOM_101",
+      "expected_direction": "LEFT",
+      "category": "ฝ่ายทะเบียนราษฎร"
+    },
+    {
+      "id": 7,
+      "query": "ยายมาจากต่างอำเภอ จะมาลงทะเบียนเบี้ยคนชรา ต้องไปติดต่อห้องไหนลูก",
+      "expected_room_id": "ROOM_102",
+      "expected_direction": "RIGHT",
+      "category": "ฝ่ายพัฒนาสังคมและสวัสดิการ"
+    },
+    {
+      "id": 8,
+      "query": "มาทำเรื่องรับเบี้ยยังชีพผู้สูงอายุ เดินไปทางไหนจ๊ะ",
+      "expected_room_id": "ROOM_102",
+      "expected_direction": "RIGHT",
+      "category": "ฝ่ายพัฒนาสังคมและสวัสดิการ"
+    },
+    {
+      "id": 9,
+      "query": "จะมาลงทะเบียนบัตรคนจน บัตรสวัสดิการแห่งรัฐ ไปห้องไหนครับ",
+      "expected_room_id": "ROOM_102",
+      "expected_direction": "RIGHT",
+      "category": "ฝ่ายพัฒนาสังคมและสวัสดิการ"
+    },
+    {
+      "id": 10,
+      "query": "พาญาติมาทำบัตรคนพิการและขอเบี้ยความพิการ มีทางลาดไปห้องไหนคะ",
+      "expected_room_id": "ROOM_102",
+      "expected_direction": "RIGHT",
+      "category": "ฝ่ายพัฒนาสังคมและสวัสดิการ"
+    },
+    {
+      "id": 11,
+      "query": "มาติดต่อขอรับเงินอุดหนุนเด็กแรกเกิด ต้องเดินไปทางซ้ายหรือขวา",
+      "expected_room_id": "ROOM_102",
+      "expected_direction": "RIGHT",
+      "category": "ฝ่ายพัฒนาสังคมและสวัสดิการ"
+    },
+    {
+      "id": 12,
+      "query": "มาขอรับเงินช่วยเหลือผู้ยากไร้ที่ฝ่ายสวัสดิการ ไปทางไหน",
+      "expected_room_id": "ROOM_102",
+      "expected_direction": "RIGHT",
+      "category": "ฝ่ายพัฒนาสังคมและสวัสดิการ"
+    },
+    {
+      "id": 13,
+      "query": "มาจ่ายภาษีที่ดินและสิ่งปลูกสร้าง ต้องไปชำระเงินห้องไหน",
+      "expected_room_id": "ROOM_103",
+      "expected_direction": "STRAIGHT",
+      "category": "กองคลังและงานจัดเก็บรายได้"
+    },
+    {
+      "id": 14,
+      "query": "เอาใบประเมินมาชำระภาษีป้ายร้านค้า ห้องกองคลังอยู่ตรงไหนครับ",
+      "expected_room_id": "ROOM_103",
+      "expected_direction": "STRAIGHT",
+      "category": "กองคลังและงานจัดเก็บรายได้"
+    },
+    {
+      "id": 15,
+      "query": "จะมาจ่ายค่าขยะรายเดือนกับค่าน้ำประปา เดินไปช่องไหนคะ",
+      "expected_room_id": "ROOM_103",
+      "expected_direction": "STRAIGHT",
+      "category": "กองคลังและงานจัดเก็บรายได้"
+    },
+    {
+      "id": 16,
+      "query": "มาติดต่อการเงินเพื่อขอออกใบเสร็จรับเงินราชการ ไปทางไหน",
+      "expected_room_id": "ROOM_103",
+      "expected_direction": "STRAIGHT",
+      "category": "กองคลังและงานจัดเก็บรายได้"
+    },
+    {
+      "id": 17,
+      "query": "ผู้รับเหมาจะมาติดต่อกองคลังเรื่องจ่ายเงินค่ารับเหมา เดินไปยังไง",
+      "expected_room_id": "ROOM_103",
+      "expected_direction": "STRAIGHT",
+      "category": "กองคลังและงานจัดเก็บรายได้"
+    },
+    {
+      "id": 18,
+      "query": "จากจุดนี้ไปห้องจ่ายภาษีเดินไปทางไหนครับ",
+      "expected_room_id": "ROOM_103",
+      "expected_direction": "STRAIGHT",
+      "category": "กองคลังและงานจัดเก็บรายได้"
+    },
+    {
+      "id": 19,
+      "query": "มาโอนที่ดินมรดก ต้องขึ้นไปชั้นไหน เตรียมโฉนดอะไรบ้าง",
+      "expected_room_id": "ROOM_201",
+      "expected_direction": "UPSTAIRS_LEFT",
+      "category": "สำนักงานที่ดินและงานช่างโยธา"
+    },
+    {
+      "id": 20,
+      "query": "ต้องการยื่นเรื่องขออนุญาตก่อสร้างบ้านใหม่ ติดต่อช่างโยธาห้องไหน",
+      "expected_room_id": "ROOM_201",
+      "expected_direction": "UPSTAIRS_LEFT",
+      "category": "สำนักงานที่ดินและงานช่างโยธา"
+    },
+    {
+      "id": 21,
+      "query": "จะมาขอยื่นรังวัดที่ดิน ต้องเดินขึ้นไปห้องไหนครับ",
+      "expected_room_id": "ROOM_201",
+      "expected_direction": "UPSTAIRS_LEFT",
+      "category": "สำนักงานที่ดินและงานช่างโยธา"
+    },
+    {
+      "id": 22,
+      "query": "เอาโฉนดมาทำเรื่องจำนองที่ดิน ไปสำนักงานที่ดินยังไงคะ",
+      "expected_room_id": "ROOM_201",
+      "expected_direction": "UPSTAIRS_LEFT",
+      "category": "สำนักงานที่ดินและงานช่างโยธา"
+    },
+    {
+      "id": 23,
+      "query": "สร้างบ้านเสร็จแล้ว อยากมาขอบ้านเลขที่ใหม่ต้องไปชั้นไหน",
+      "expected_room_id": "ROOM_201",
+      "expected_direction": "UPSTAIRS_LEFT",
+      "category": "สำนักงานที่ดินและงานช่างโยธา"
+    },
+    {
+      "id": 24,
+      "query": "มาไถ่ถอนจำนองโฉนดที่ดิน ติดต่อห้องไหนครับ",
+      "expected_room_id": "ROOM_201",
+      "expected_direction": "UPSTAIRS_LEFT",
+      "category": "สำนักงานที่ดินและงานช่างโยธา"
+    },
+    {
+      "id": 25,
+      "query": "ต้องการร้องเรียนปัญหาความเดือดร้อนที่ศูนย์ดำรงธรรม ไปทางไหน",
+      "expected_room_id": "ROOM_202",
+      "expected_direction": "UPSTAIRS_RIGHT",
+      "category": "ศูนย์ดำรงธรรมและงานนิติการ"
+    },
+    {
+      "id": 26,
+      "query": "อยากมาขอปรึกษากฎหมายฟรีกับทนาย ต้องขึ้นไปห้องไหนคะ",
+      "expected_room_id": "ROOM_202",
+      "expected_direction": "UPSTAIRS_RIGHT",
+      "category": "ศูนย์ดำรงธรรมและงานนิติการ"
+    },
+    {
+      "id": 27,
+      "query": "ถนนพังและไฟทางดับหน้าหมู่บ้าน จะมาร้องทุกข์ได้ที่ห้องไหน",
+      "expected_room_id": "ROOM_202",
+      "expected_direction": "UPSTAIRS_RIGHT",
+      "category": "ศูนย์ดำรงธรรมและงานนิติการ"
+    },
+    {
+      "id": 28,
+      "query": "นัดคู่กรณีมาไกล่เกลี่ยข้อพิพาทที่ศูนย์ดำรงธรรม เดินไปยังไงครับ",
+      "expected_room_id": "ROOM_202",
+      "expected_direction": "UPSTAIRS_RIGHT",
+      "category": "ศูนย์ดำรงธรรมและงานนิติการ"
+    },
+    {
+      "id": 29,
+      "query": "น้ำท่วมขังซอยบ้านเดือดร้อนมาก มาแจ้งเรื่องร้องเรียนห้องไหน",
+      "expected_room_id": "ROOM_202",
+      "expected_direction": "UPSTAIRS_RIGHT",
+      "category": "ศูนย์ดำรงธรรมและงานนิติการ"
+    },
+    {
+      "id": 30,
+      "query": "มีเรื่องข้อพิพาทอยากปรึกษางานนิติการและกฎหมาย อยู่ชั้นไหนครับ",
+      "expected_room_id": "ROOM_202",
+      "expected_direction": "UPSTAIRS_RIGHT",
+      "category": "ศูนย์ดำรงธรรมและงานนิติการ"
+    }
+  ]
+}

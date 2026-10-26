@@ -1,0 +1,12 @@
+matplotlib>=3.7.0
+Pillow>=10.0.0
+streamlit>=1.30.0
+requests>=2.31.0
+vachanatts>=0.0.7
+onnxruntime>=1.16.0
+pythainlp>=5.0.0
+python-crfsuite>=0.9.10
+ssg>=0.0.8
+# สำหรับติดตั้งบน Raspberry Pi 4 เท่านั้น:
+# RPi.GPIO>=0.7.1
+# adafruit-circuitpython-dht>=4.0.0
